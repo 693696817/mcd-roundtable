@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# 凭证：绝不提交任何真实 Token
+.env
+.env.*
+*.local
+secrets.json
+
+# 工具
+.idea/
+.vscode/
+.DS_Store
+
+# 素材生成过程的中间产物：留下来的应该是 assets/ 里的成品，不是这些
+.capture*.txt
+_shot*.png
+_verify*.html

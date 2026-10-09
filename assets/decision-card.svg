@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="823" viewBox="0 0 760 823" role="img" aria-label="麦门圆桌决议卡">
+<rect width="760" height="823" fill="#F4F1EC"/>
+<rect x="0" y="0" width="760" height="799" fill="#FFFFFF"/>
+<rect x="0.0" y="0.0" width="760.0" height="104.0" rx="0.0" fill="#DA291C"/>
+<rect x="0.0" y="104.0" width="760.0" height="7.0" rx="0.0" fill="#FFC72C"/>
+<text x="44.0" y="50.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="30" font-weight="700" fill="#FFFFFF" text-anchor="start" letter-spacing="1">麦门圆桌</text>
+<text x="44.0" y="76.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="12.5" font-weight="500" fill="#FFD9D5" text-anchor="start" letter-spacing="1.4">MCD ROUNDTABLE  ·  AI 议会点单</text>
+<text x="716.0" y="50.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="15" font-weight="700" fill="#FFC72C" text-anchor="end" letter-spacing="3">决 议 书</text>
+<text x="716.0" y="76.0" font-family="'SF Mono','Consolas','Menlo',monospace" font-size="12" font-weight="400" fill="#FFD9D5" text-anchor="end">NO. 5414</text>
+<text x="44.0" y="156.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="11.5" font-weight="600" fill="#B5B5B5" text-anchor="start" letter-spacing="2">议 题</text>
+<text x="44.0" y="180.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="19" font-weight="700" fill="#1B1B1B" text-anchor="start">三个人，预算 96，把券用到极致，想吃饱</text>
+<text x="44.0" y="217.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="12" font-weight="400" fill="#6B6B6B" text-anchor="start">麦当劳（示例·正弘城店）  ·  3 人  ·  离线演示数据</text>
+<text x="44.0" y="233.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="12" font-weight="400" fill="#B5B5B5" text-anchor="start">总预算 ≤¥96  ·  饱腹 · 省钱</text>
+<line x1="44.0" y1="261.0" x2="716.0" y2="261.0" stroke="#E4E4E4" stroke-width="1.0"/>
+<text x="44.0" y="291.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="11.5" font-weight="600" fill="#B5B5B5" text-anchor="start" letter-spacing="2">决 议 明 细</text>
+<text x="44.0" y="317.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="15" font-weight="600" fill="#1B1B1B" text-anchor="start">1+1 随心配</text>
+<text x="716.0" y="317.0" font-family="'SF Mono','Consolas','Menlo',monospace" font-size="15" font-weight="600" fill="#1B1B1B" text-anchor="end">¥41.7</text>
+<text x="638.0" y="317.0" font-family="'SF Mono','Consolas','Menlo',monospace" font-size="12.5" font-weight="400" fill="#B5B5B5" text-anchor="end">×3</text>
+<text x="44.0" y="342.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="15" font-weight="600" fill="#1B1B1B" text-anchor="start">中薯条</text>
+<text x="716.0" y="342.0" font-family="'SF Mono','Consolas','Menlo',monospace" font-size="15" font-weight="600" fill="#1B1B1B" text-anchor="end">¥36.0</text>
+<text x="638.0" y="342.0" font-family="'SF Mono','Consolas','Menlo',monospace" font-size="12.5" font-weight="400" fill="#B5B5B5" text-anchor="end">×3</text>
+<line x1="44.0" y1="373.0" x2="716.0" y2="373.0" stroke="#E4E4E4" stroke-width="1.0" stroke-dasharray="4 4"/>
+<text x="52.0" y="399.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="13" font-weight="400" fill="#6B6B6B" text-anchor="start">小计</text>
+<text x="716.0" y="399.0" font-family="'SF Mono','Consolas','Menlo',monospace" font-size="13.5" font-weight="400" fill="#1B1B1B" text-anchor="end">¥77.7</text>
+<text x="52.0" y="421.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="13" font-weight="400" fill="#6B6B6B" text-anchor="start">优惠券抵扣</text>
+<text x="716.0" y="421.0" font-family="'SF Mono','Consolas','Menlo',monospace" font-size="13.5" font-weight="400" fill="#DA291C" text-anchor="end">−¥12.0</text>
+<rect x="44.0" y="449.0" width="672.0" height="62.0" rx="10" fill="#FFF6F5"/>
+<text x="62.0" y="477.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="13" font-weight="600" fill="#6B6B6B" text-anchor="start">应  付</text>
+<text x="118.0" y="483.0" font-family="'SF Mono','Consolas','Menlo',monospace" font-size="27" font-weight="700" fill="#DA291C" text-anchor="start">¥65.7</text>
+<text x="698.0" y="483.0" font-family="'SF Mono','Consolas','Menlo',monospace" font-size="15" font-weight="700" fill="#1B1B1B" text-anchor="end">人均 ¥21.9</text>
+<text x="44.0" y="537.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="11.5" font-weight="600" fill="#B5B5B5" text-anchor="start" letter-spacing="2">一 句 话</text>
+<text x="44.0" y="561.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="15" font-weight="600" fill="#1B1B1B" text-anchor="start">2 类商品共 6 件，用券省 ¥12.0，人均 ¥21.9。</text>
+<text x="44.0" y="592.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="12.5" font-weight="400" fill="#6B6B6B" text-anchor="start">本单比最便宜的方案（¥64.5）多花 ¥1.2，换来 人均多 150kcal 饱腹度。若你只要最低价，说一声我就换。</text>
+<line x1="44.0" y1="625.0" x2="716.0" y2="625.0" stroke="#E4E4E4" stroke-width="1.0" stroke-dasharray="4 4"/>
+<text x="44.0" y="651.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="11.5" font-weight="600" fill="#B5B5B5" text-anchor="start" letter-spacing="2">谁 赢 了</text>
+<text x="44.0" y="675.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="13" font-weight="400" fill="#1B1B1B" text-anchor="start">省钱部长 → 1+1 随心配 · 健身总监 → 1+1 随心配 · 尝鲜委员 → 1+1 随心配、中薯条</text>
+<text x="44.0" y="699.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="12" font-weight="400" fill="#B5B5B5" text-anchor="start">未采纳：麦门老饕、养生专员</text>
+<line x1="44.0" y1="743.0" x2="716.0" y2="743.0" stroke="#E4E4E4" stroke-width="1.0"/>
+<text x="44.0" y="767.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="11.5" font-weight="400" fill="#B5B5B5" text-anchor="start">金额来自麦当劳官方 calculate-price 实时试算</text>
+<text x="44.0" y="785.0" font-family="'PingFang SC','Microsoft YaHei','Hiragino Sans GB','Noto Sans CJK SC',sans-serif" font-size="11.5" font-weight="400" fill="#B5B5B5" text-anchor="start">麦门圆桌 · 本项目不参与任何支付环节，下单请前往麦当劳官方渠道</text>
+</svg>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>麦门圆桌决议书 · 中午想吃饱，35 以内，把券用上</title>
+<style>
+:root{
+  --red:#DA291C; --yellow:#FFC72C; --ink:#1F1D1B; --muted:#6B7280;
+  --faint:#9CA3AF; --line:#E5E7EB; --paper:#fff; --canvas:#F4F1EC;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--canvas); color:var(--ink); padding:18px 12px 40px;
+  display:flex; justify-content:center; align-items:flex-start;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",
+    "Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:660px;width:100%}
+
+/* ---------- 顶部品牌带 ---------- */
+.hero{background:var(--red);color:#fff;padding:22px 24px;border-radius:14px 14px 0 0;
+  box-shadow:0 6px 18px rgba(218,41,28,.18)}
+.hero-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hero h1{font-size:21px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.chip{background:var(--yellow);color:#3A2E00;font-size:11px;font-weight:800;
+  padding:3px 9px;border-radius:999px;letter-spacing:.5px;white-space:nowrap}
+.hero .stamp{font-size:11px;opacity:.85;font-variant-numeric:tabular-nums}
+.ask{margin-top:14px;background:rgba(0,0,0,.16);border-radius:9px;padding:11px 14px;font-size:14px}
+.ask b{color:var(--yellow)}
+.ask .sub{font-size:12px;opacity:.85;margin-top:5px}
+
+/* ---------- 作者条 ---------- */
+.author{background:#fff;border:1px solid var(--line);border-top:0;padding:10px 24px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.author b{color:var(--red)}
+.author .wx{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ---------- 通用卡片 ---------- */
+.card{background:#fff;border:1px solid var(--line);border-top:0;padding:20px 24px 22px}
+.card.last{border-radius:0 0 14px 14px;border-bottom:1px solid var(--line)}
+.sec{font-size:13px;font-weight:800;color:#475569;letter-spacing:.6px;
+  display:flex;align-items:center;gap:7px;margin-bottom:16px}
+.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ---------- 辩论时间线 ---------- */
+.msg{display:flex;gap:11px;margin-bottom:15px;opacity:0;transform:translateY(9px);
+  animation:rise .40s cubic-bezier(.2,.8,.3,1) forwards;animation-delay:var(--d,0s)}
+@keyframes rise{to{opacity:1;transform:none}}
+.badge{width:38px;height:38px;border-radius:11px;flex:0 0 38px;display:flex;
+  align-items:center;justify-content:center;font-size:19px;line-height:1}
+.badge.r{border-radius:50%}
+.mbody{flex:1;min-width:0}
+.mhead{display:flex;align-items:center;gap:7px;margin-bottom:4px;flex-wrap:wrap}
+.who{font-size:13px;font-weight:800}
+.arrow{font-size:11.5px;color:var(--faint)}
+.bubble{background:#F8FAFC;border:1px solid #EDF1F5;border-radius:12px;
+  padding:9px 13px;font-size:13.5px;color:#334155;word-break:break-word}
+.bubble.win{background:#FFFBEB;border-color:#FDE68A}
+.pitch{margin-top:7px;font-size:12.5px;color:var(--muted);padding-left:11px;
+  border-left:2px solid var(--line);word-break:break-word}
+.amt{font-weight:800;color:#B7791F;font-variant-numeric:tabular-nums}
+
+/* ---------- 试算表 ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-size:11px;color:var(--faint);text-align:left;padding:0 0 8px;
+  border-bottom:1px solid var(--line);font-weight:700}
+.tbl td{padding:9px 0;border-bottom:1px dashed #F1F5F9;color:#475569}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .n{text-align:right;font-variant-numeric:tabular-nums;
+  font-family:ui-monospace,Menlo,Consolas,monospace}
+.tbl tr.win td{color:var(--ink);font-weight:700}
+.tbl tr.win{background:#FFFBEB}
+.tbl .lab{max-width:0;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mark{font-size:10px;margin-right:6px}
+.mark.on{color:var(--red)}
+.mark.off{color:#CBD5E1}
+.tnote{margin-top:11px;font-size:11.5px;color:var(--faint)}
+
+/* ---------- 小票 ---------- */
+.receipt{position:relative;background:#fff;border:1px solid var(--line);border-top:0;
+  padding:22px 24px 26px}
+.receipt::after{content:"";position:absolute;left:-1px;right:-1px;bottom:-11px;height:12px;
+  background-image:radial-gradient(circle at 10px 0,#fff 10px,transparent 10.5px);
+  background-size:20px 12px;background-repeat:repeat-x}
+.rhead{text-align:center;margin-bottom:16px}
+.rhead h2{font-size:15px;font-weight:800;letter-spacing:2.5px;color:var(--ink)}
+.rhead p{font-size:11.5px;color:var(--faint);margin-top:3px}
+.items{width:100%;border-collapse:collapse;margin-bottom:4px}
+.items td{padding:10px 0;border-bottom:1px dashed #F1F5F9;font-size:14px;vertical-align:top}
+.items .qty{text-align:center;color:var(--faint);font-size:12.5px;width:52px;
+  font-variant-numeric:tabular-nums}
+.items .pr{text-align:right;font-weight:700;width:88px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.sum{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);padding:5px 0}
+.sum.save{color:#15803D}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:12px;
+  padding-top:13px;border-top:2px solid var(--line)}
+.total .lab{font-size:13px;font-weight:700;color:var(--muted)}
+.total .val{font-size:27px;font-weight:800;color:var(--red);
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.total .pp{font-size:13px;font-weight:700;margin-left:10px;color:var(--ink)}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}
+.tag{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px}
+.tag.p{background:#EFF6FF;color:#1D4ED8}
+.tag.k{background:#FEF2F2;color:#B91C1C}
+.tag.n{background:#F0FDF4;color:#15803D}
+.note{margin-top:14px;background:#FFFBEB;border-left:3px solid var(--yellow);
+  border-radius:0 7px 7px 0;padding:10px 13px;font-size:12.5px;color:#8A6A00}
+.pay{display:block;width:100%;margin-top:18px;padding:14px;border-radius:11px;text-align:center;
+  background:var(--yellow);color:#3A2E00;font-weight:800;font-size:15.5px;text-decoration:none;
+  box-shadow:0 5px 14px rgba(255,199,44,.45);letter-spacing:.4px}
+.pay.off{background:#EEF1F4;color:#6B7280;box-shadow:none;font-weight:700;font-size:13.5px}
+.source{margin-top:14px;font-size:11.5px;color:var(--faint);text-align:center}
+
+/* ---------- 谁赢了 ---------- */
+.win-row{display:flex;gap:9px;align-items:flex-start;font-size:13px;margin-bottom:9px}
+.win-row .k{font-size:11.5px;font-weight:800;color:var(--faint);flex:0 0 52px;padding-top:2px}
+.win-row .v{color:var(--ink);word-break:break-word}
+.win-row .v.dim{color:var(--faint)}
+
+/* ---------- 页脚 ---------- */
+footer{margin-top:26px;text-align:center;font-size:11.5px;color:var(--faint);line-height:1.85}
+footer b{color:var(--red)}
+footer .wx{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
+
+@media (prefers-reduced-motion:reduce){
+  .msg{animation:none;opacity:1;transform:none}
+}
+@media (max-width:480px){
+  body{padding:10px 8px 30px}
+  .hero,.card,.receipt{padding-left:16px;padding-right:16px}
+  .hero h1{font-size:18px}
+  .total .val{font-size:23px}
+}
+@media print{
+  body{background:#fff;padding:0}
+  .hero{box-shadow:none}
+  .pay{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-top">
+      <h1>🍔 麦门圆桌议会 <span class="chip">正式裁决</span></h1>
+      <span class="stamp">2026-10-09 18:21</span>
+    </div>
+    <div class="ask">
+      <b>🎯 本期诉求：</b>中午想吃饱，35 以内，把券用上
+      <div class="sub">📍 麦当劳郑州正弘城餐厅
+        · 1 人
+        · 大脑：规则</div>
+    </div>
+  </div>
+
+  <div class="author">
+    <div>开源项目：<b>mcd-roundtable</b></div>
+    <div>👨‍💻 开发者微信：<span class="wx">zyj118</span></div>
+  </div>
+
+  <div class="card">
+    <div class="sec">💬 议会交锋纪要</div>
+    <div class="msg" style="--d:0.00s"><div class="badge" style="background:#FFF8E1">💰</div><div class="mbody"><div class="mhead"><span class="who" style="color:#B7791F">省钱部长</span><span class="arrow">第 1 轮 · 提案</span><span class="amt">¥34.0</span></div><div class="bubble">麦香鸡 + 脆脆薯条。合计约 ¥34.0，人均 ¥34.0，能不能用券由官方试算说了算 —— 券用掉才叫划算。</div><div class="pitch">麦香鸡 369kcal/¥17.5；脆脆薯条 279kcal/¥16.5</div></div></div>
+<div class="msg" style="--d:0.12s"><div class="badge" style="background:#ECFEFF">🏋️</div><div class="mbody"><div class="mhead"><span class="who" style="color:#0E7490">健身总监</span><span class="arrow">第 1 轮 · 提案</span><span class="amt">¥34.0</span></div><div class="bubble">换成芝士安格斯厚牛堡。蛋白质合计约 32g，合计 ¥34.0，结构比堆主食更可控。</div><div class="pitch">芝士安格斯厚牛堡 蛋白质 32g</div></div></div>
+<div class="msg" style="--d:0.24s"><div class="badge" style="background:#FFF1F0">🍔</div><div class="mbody"><div class="mhead"><span class="who" style="color:#DA291C">麦门老饕</span><span class="arrow">第 1 轮 · 提案</span><span class="amt">¥31.9</span></div><div class="bubble">就龙焰芝士棒鸡腿堡三件套 + 麦当劳素龙限定饼干。合计 ¥31.9，人均 ¥31.9。经典之所以经典是有理由的。</div></div></div>
+<div class="msg" style="--d:0.36s"><div class="badge" style="background:#F0FDF4">🌿</div><div class="mbody"><div class="mhead"><span class="who" style="color:#15803D">养生专员</span><span class="arrow">第 1 轮 · 提案</span><span class="amt">¥31.9</span></div><div class="bubble">建议龙焰芝士棒鸡腿堡三件套 + 麦当劳素龙限定饼干，合计 ¥31.9。官方营养表里查不到它们的钠值，我不能说它清淡。</div></div></div>
+<div class="msg" style="--d:0.48s"><div class="badge" style="background:#F5F3FF">🎲</div><div class="mbody"><div class="mhead"><span class="who" style="color:#7C3AED">尝鲜委员</span><span class="arrow">第 1 轮 · 提案</span><span class="amt">¥30.0</span></div><div class="bubble">你们每次都点这几样。试试人气超值四件套随心选 + 麦当劳素龙限定饼干，合计 ¥30.0，人均 ¥30.0，人生苦短。</div></div></div>
+<div class="msg" style="--d:0.60s"><div class="badge r" style="background:#FFF8E1">💰</div><div class="mbody"><div class="mhead"><span class="who" style="color:#B7791F">省钱部长</span><span class="arrow">第 2 轮 · 质询</span></div><div class="bubble">官方试算跑了 4 组，最便宜的方案能到 ¥26.5（暂定采纳的是 ¥34.0）。各方案差距不大，多花的钱买到了什么，请用数字回答，我这边只看结果。</div></div></div>
+<div class="msg" style="--d:0.72s"><div class="badge r" style="background:#F0FDF4">🌿</div><div class="mbody"><div class="mhead"><span class="who" style="color:#15803D">养生专员</span><span class="arrow">→ 质询 省钱部长</span></div><div class="bubble">你这份人均钠约 1271mg。一顿别把一天的额度一次交出去——钠是慢慢还的账。</div></div></div>
+<div class="msg" style="--d:0.84s"><div class="badge r" style="background:#FFF1F0">🍔</div><div class="mbody"><div class="mhead"><span class="who" style="color:#DA291C">麦门老饕</span><span class="arrow">第 2 轮 · 质询</span></div><div class="bubble">换配可以谈，但别把一套成熟搭配拆得面目全非——它被留下来，是因为它本来就成立。</div></div></div>
+<div class="msg" style="--d:0.96s"><div class="badge r" style="background:#F5F3FF">🎲</div><div class="mbody"><div class="mhead"><span class="who" style="color:#7C3AED">尝鲜委员</span><span class="arrow">→ 质询 麦门老饕</span></div><div class="bubble">老饕，你上次换口味是什么时候？菜单不是博物馆。同一份点第四次，点的是惯性不是胃口。</div></div></div>
+  </div>
+
+  <div class="card"><div class="sec">🧾 真实试算 · 共 4 组</div><table class="tbl"><thead><tr><th>候选组合</th><th style='text-align:right'>原价</th><th style='text-align:right'>优惠</th><th style='text-align:right'>实付</th><th style='text-align:right'>人均</th></tr></thead><tbody><tr class="win"><td><span class="lab"><span class="mark on">◆</span>麦香鸡、脆脆薯条</span></td><td class="n">¥34.0</td><td class="n">—</td><td class="n">¥34.0</td><td class="n">¥34.0</td></tr><tr><td><span class="lab"><span class="mark off">◇</span>芝士安格斯厚牛堡</span></td><td class="n">¥34.0</td><td class="n">—</td><td class="n">¥34.0</td><td class="n">¥34.0</td></tr><tr><td><span class="lab"><span class="mark off">◇</span>巨无霸</span></td><td class="n">¥26.5</td><td class="n">—</td><td class="n">¥26.5</td><td class="n">¥26.5</td></tr><tr><td><span class="lab"><span class="mark off">◇</span>不素之霸双层牛堡</span></td><td class="n">¥27.0</td><td class="n">—</td><td class="n">¥27.0</td><td class="n">¥27.0</td></tr></tbody></table><div class="tnote">以上每一组都由麦当劳官方 calculate-price 实时试算，不是本工具的估算值。</div></div>
+
+  <div class="card"><div class="sec">🏆 谁赢了</div><div class="win-row"><span class="k">采 纳</span><span class="v">省钱部长 → 麦香鸡、脆脆薯条</span></div><div class="win-row"><span class="k">未采纳</span><span class="v dim">健身总监、麦门老饕、养生专员、尝鲜委员</span></div><div class="win-row"><span class="k">一句话</span><span class="v">2 类商品共 2 件，本单未触发优惠，人均 ¥34.0。</span></div></div>
+
+  <div class="receipt"><div class="rhead"><h2>MCD ROUNDTABLE RECEIPT</h2><p>官方 MCP 试算 · 绝无模型幻觉金额</p></div><table class="items"><tbody><tr><td>麦香鸡</td><td class="qty">×1</td><td class="pr">¥17.5</td></tr><tr><td>脆脆薯条</td><td class="qty">×1</td><td class="pr">¥16.5</td></tr></tbody></table><div class="sum"><span>小计</span><span>¥34.0</span></div><div class="total"><span class="lab">应&nbsp;&nbsp;付</span><span><span class="val">¥34.0</span></span></div><div class="tags"><span class="tag p">🥩 蛋白质 ≈ 19g/人</span><span class="tag k">🔥 热量 ≈ 648kcal/人</span><span class="tag n">🧂 钠 ≈ 1271mg/人</span></div><div class="note">📝 裁决依据：本单比最便宜的方案（¥26.5）多花 ¥7.5，换来 人均多 135kcal 饱腹度。若你只要最低价，说一声我就换。</div><div class="pay off">✅ 决议已敲定 · 加 <code>--order</code> 可生成麦当劳官方支付链接</div><div class="source">麦当劳郑州正弘城餐厅 · 1 人 · 真实 MCP 接口<br>金额来自麦当劳官方 calculate-price 实时试算</div></div>
+
+  <footer>
+    本项目为 <b>2026 麦当劳程序员创意开发大赛</b> 开源参赛作品，非麦当劳官方产品<br>
+    餐品、价格、优惠、营养数据均来自麦当劳中国官方 MCP Server<br>
+    金额以麦当劳官方渠道的最终结算为准，本页仅供参考<br>
+    欢迎技术交流与协作探讨 · 微信 <span class="wx">zyj118</span>
+  </footer>
+
+</div>
+</body>
+</html>

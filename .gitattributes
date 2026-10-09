@@ -1,0 +1,8 @@
+* text=auto eol=lf
+
+# 参赛声明必须与官方模板逐字节一致：显式锁成 LF，避免在 Windows 上 checkout 出 CRLF
+CONTEST_DECLARATION.md text eol=lf
+
+# 二进制素材不要做行尾转换
+*.png binary
+*.gif binary
