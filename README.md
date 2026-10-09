@@ -445,12 +445,14 @@ mcd-roundtable/
 │   ├── terminal-debate.png      # 第 2 轮质询 + 真实试算
 │   ├── terminal-verdict.png     # 主持人裁决小票
 │   ├── decision-card.svg        # 演示模式导出的决议卡
-│   └── live-card.svg            # 真实模式导出的决议卡
+│   ├── live-card.svg            # 真实模式导出的决议卡
+│   └── social-preview.png       # 仓库社交预览卡（1280×640，转发链接时的那张图）
 ├── examples/
 │   └── regression.py            # 回归：纯函数单测 + 5 个端到端场景
 ├── tools/                       # 开发期工具，不是运行时依赖
 │   ├── render_terminal_png.py   # 终端输出 → PNG
 │   ├── render_demo_gif.py       # 终端输出 → 演示 GIF
+│   ├── render_social_preview.py # 生成社交预览卡（配色直接 import 项目品牌色）
 │   └── check_width.py           # 校验列宽与行首禁则
 └── src/mcd_roundtable/
     ├── cli.py                   # 命令行入口
