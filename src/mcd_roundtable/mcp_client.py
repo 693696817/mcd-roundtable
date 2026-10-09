@@ -78,6 +78,10 @@ BE_TYPE_DELIVERY = 2
 BE_TYPE_DRIVE = 5
 BE_TYPE_CATERING = 6
 
+# 门店不可点单（典型：600057 门店已关闭或不在营业时间）时，最多再看几家。
+# 取 3 是因为实测同一份 nearby 返回里，最近的一家关门时，第二三家往往还开着。
+MAX_STORE_TRIES = 3
+
 _DECODER = json.JSONDecoder()
 
 
@@ -680,18 +684,95 @@ async def load_data(
     store_list = stores if isinstance(stores, list) else (stores or {}).get("stores") or []
     if not store_list and isinstance(stores, dict):
         store_list = stores.get("data") or []
+
     if isinstance(store_list, list) and store_list:
-        data.store = store_list[0]
-        data.ctx.store_code = str(data.store.get("storeCode") or "")
-        data.ctx.be_code = str(data.store.get("beCode") or "")
+        candidates = [s for s in store_list if isinstance(s, dict) and s.get("storeCode")]
+        # 接口返回的**第一手顺序就是由近及远**，先把它记下来：
+        # 后面会把开门门店提前，届时"最终选中的不是最近那家"是需要向用户交代的。
+        # 连"为什么没选它"也一起记：打烊门店会被垫底，我们根本不会去问它，
+        # 届时若能给出一句真原因（而不是含混的"不可点单"），才不至于让用户猜。
+        nearest_label = ""
+        nearest_reason = ""
+        nearest_code = ""
+        if candidates:
+            nearest = candidates[0]
+            nearest_code = str(nearest.get("storeCode") or "")
+            nearest_label = str(nearest.get("storeName") or nearest_code)
+            if nearest.get("businessStatus") is False:
+                nearest_reason = "当前不在营业时间"
+
+        # 就近优先仍是主序，但**明确打烊的门店往后放**。为什么必须这么做：
+        # 实测跑「--city 郑州 --keyword 奥体中心」时，最近的门店（麦当劳郑州CCD奥体中心
+        # 餐厅，07:00–22:00）在 23 点已经打烊，query-meals 直接回 600057；而同一份返回里
+        # 第二、三家还开着。以前无条件取 store_list[0]，于是"最近的一家关门"就等于
+        # "整个工具不可用"——这是产品问题，不是网络问题。
+        #
+        # 两处刻意的选择：
+        #
+        # 1. **分组垫底，而不是排序丢弃**。确定关门的留在列表尾部当最后手段。
+        #    如果某个搜索词只匹配到一家门店、而它明确打烊，丢掉它就等于"一家都没问过"，
+        #    最后只能抛出"请用 --city 与 --keyword 指定"——把用户引去查参数，而真正
+        #    原因是那家店关门了。留着它去问一次，600057 这条一手原因才能落进 warnings。
+        # 2. **用 `is False`，不用 `not ...`**。`not None` 会把"接口没给状态"也判成关门
+        #    而下沉，于是状态未知的最近门店被降级到已知开门的远店之后。用户点的就是
+        #    最近那家，不该仅因为接口没给状态就被悄悄换掉。
+        openish = [s for s in candidates if s.get("businessStatus") is not False]
+        closed = [s for s in candidates if s.get("businessStatus") is False]
+        ordered = openish + closed
+
+        # 真的问过最近那家、并且它拒单时，把接口原话留一份给"换店披露"用
+        nearest_error = ""
+        for store in ordered[:MAX_STORE_TRIES]:
+            code = str(store.get("storeCode") or "")
+            label = str(store.get("storeName") or code)
+            data.store = store
+            data.ctx.store_code = code
+            data.ctx.be_code = str(store.get("beCode") or "")
+
+            meals = None
+            try:
+                meals = await client.call("query-meals", data.ctx.args())
+            except Exception as exc:  # noqa: BLE001
+                if code == nearest_code:
+                    nearest_error = str(exc)[:50]
+                data.warnings.append("门店「%s」菜单获取失败：%s" % (label, str(exc)[:50]))
+                continue
+
+            if isinstance(meals, dict) and meals.get("_error"):
+                # 把接口原话带出来（例如 600057 门店已关闭或不在营业时间），
+                # 不要把它降级成"菜单可能为空"这类含糊说法。
+                if code == nearest_code:
+                    nearest_error = str(meals["_error"])
+                data.warnings.append("门店「%s」不可点单：%s" % (label, meals["_error"]))
+                continue
+
+            _load_menu(data, meals)
+            if data.menu:
+                # 换了店就必须说。用户输入的是"奥体中心"，我们去别家下单——
+                # 这件事如果不说，用户会以为自己点的就是奥体中心那家，
+                # 到店才发现取餐点在两公里外。换店是权宜，不是等价替换。
+                #
+                # 原因按可信度取：接口原话 > businessStatus 推断 > 老实说不知道。
+                if nearest_label and data.store_name != nearest_label:
+                    why = nearest_error or nearest_reason or "当前不可点单"
+                    data.warnings.append(
+                        "最近的「%s」%s，已就近改用「%s」" % (nearest_label, why, data.store_name)
+                    )
+                break
+            data.warnings.append("门店「%s」菜单为空，尝试下一家" % label)
+
+        if not data.menu:
+            # 全试过都不行：把门店状态清干净，别留下"半个门店"让下游继续跑
+            data.store = {}
+            data.ctx.store_code = ""
+            data.ctx.be_code = ""
 
     if not data.ctx.store_code and data.is_demo:
         data.store = demo_data.DEMO_STORE
         data.ctx.store_code = str(data.store.get("storeCode") or "")
+        data.ctx.be_code = str(data.store.get("beCode") or "")
 
-    if data.ctx.store_code:
-        _load_menu(data, await _safe(client, "query-meals", data.ctx.args(), data, None))
-    else:
+    if not data.ctx.store_code:
         data.warnings.append("未取到门店：请用 --city 与 --keyword 指定（两者都要给）")
 
     nutrition = parse_nutrition_toon(await _safe(client, "list-nutrition-foods", {}, data, None))

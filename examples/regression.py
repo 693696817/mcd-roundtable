@@ -45,6 +45,7 @@ def expect(name: str, got, want) -> None:
 def check_units() -> int:
     from mcd_roundtable.council import Constraint, parse_constraint
     from mcd_roundtable.mcp_client import (
+        MAX_STORE_TRIES,
         _load_campaigns,
         _to_float,
         extract_text,
@@ -200,6 +201,125 @@ def check_units() -> int:
         _unit_failures.append("HTML 小票里的门店名没有被转义")
     if "&lt;script&gt;" not in html:
         _unit_failures.append("HTML 小票把门店名整段丢了（应当转义后保留）")
+
+    # ---- 门店打烊后的换店重试 -------------------------------------------- #
+    # 这是真机上真实发生过、并且伪装成别的问题的一次故障：
+    # `--city 郑州 --keyword 奥体中心` 的最近门店（07:00–22:00）在 23:13 已打烊，
+    # query-meals 回 600057。老代码无条件取 store_list[0]，于是"最近的一家关门"
+    # 被讲成"菜单或营养数据可能为空"——报了一个错误的原因，比不报错还费时间。
+    import asyncio
+
+    from mcd_roundtable.mcp_client import load_data
+
+    MEALS = {
+        "categories": [{"name": "人气热卖", "meals": [{"code": "B001", "tags": []}]}],
+        "meals": {"B001": {"name": "巨无霸", "currentPrice": "25"}},
+    }
+    CLOSED = {"_error": "门店可能已关闭或不在营业时间", "_code": 600057}
+
+    class _FakeMCP:
+        """只回 load_data 真正要问的那几件；其余按 None 兜底。"""
+
+        mode = "live"
+
+        def __init__(self, stores, closed_codes):
+            self.stores = stores
+            self.closed_codes = closed_codes
+            self.meals_asked: list[str] = []
+
+        async def call(self, tool, args=None, **_kw):
+            if tool == "query-nearby-stores":
+                return self.stores
+            if tool == "query-meals":
+                code = str((args or {}).get("storeCode") or "")
+                self.meals_asked.append(code)
+                return CLOSED if code in self.closed_codes else MEALS
+            return None
+
+    # 场景一：最近那家打烊，第二家开着 → 应当落到第二家，且必须说出来
+    fake = _FakeMCP(
+        stores=[
+            {"storeCode": "3560130", "storeName": "CCD奥体中心餐厅", "businessStatus": False},
+            {"storeCode": "3560999", "storeName": "中原万达金街餐厅", "businessStatus": True},
+        ],
+        closed_codes={"3560130"},
+    )
+    live = asyncio.run(load_data(fake))
+    expect("打烊门店被跳过，落到开着的那家", live.store_name, "中原万达金街餐厅")
+    expect("换店后菜单非空", [m.name for m in live.menu], ["巨无霸"])
+    # 打烊的门店不该被白问一次——businessStatus 已经告诉我答案了
+    expect("不给已知打烊的门店发菜单请求", fake.meals_asked, ["3560999"])
+    if not any("CCD奥体中心餐厅" in w and "中原万达金街餐厅" in w for w in live.warnings):
+        _unit_failures.append("换了店却没告知用户（用户会以为取餐点还在奥体中心）")
+
+    # 场景二：接口整批不给 businessStatus → 不能因为"状态未知"就乱序，
+    # 必须原样保留由近及远的顺序，就近优先不能倒退
+    fake = _FakeMCP(
+        stores=[
+            {"storeCode": "1", "storeName": "最近店"},
+            {"storeCode": "2", "storeName": "次近店"},
+        ],
+        closed_codes=set(),
+    )
+    live = asyncio.run(load_data(fake))
+    expect("状态未知时仍就近优先", live.store_name, "最近店")
+    if any("已就近改用" in w for w in live.warnings):
+        _unit_failures.append("没有换店却报了『已就近改用』")
+
+    # 场景二之补：最近那家状态未知，第二家明确开着 → 仍然先问最近的。
+    # 这一条防的是"状态未知被当成关门"的过度降级：接口没给状态，不等于它关了。
+    fake = _FakeMCP(
+        stores=[
+            {"storeCode": "1", "storeName": "最近店"},
+            {"storeCode": "2", "storeName": "次近店", "businessStatus": True},
+        ],
+        closed_codes=set(),
+    )
+    live = asyncio.run(load_data(fake))
+    expect("状态未知不等于关门，最近店照样先问", fake.meals_asked, ["1"])
+    expect("没有被降级到次近店", live.store_name, "最近店")
+
+    # 场景二之再补：最近那家状态未知、问了才知道关了 → 披露要用接口原话，
+    # 而不是拿 businessStatus 推断出的那句。接口原话永远比我们的推断可信。
+    fake = _FakeMCP(
+        stores=[
+            {"storeCode": "1", "storeName": "最近店"},
+            {"storeCode": "2", "storeName": "次近店", "businessStatus": True},
+        ],
+        closed_codes={"1"},
+    )
+    live = asyncio.run(load_data(fake))
+    expect("问过之后才知关门，落到次近店", live.store_name, "次近店")
+    if not any("门店可能已关闭或不在营业时间" in w and "已就近改用" in w for w in live.warnings):
+        _unit_failures.append("换店披露没有带上接口原话（应当说清是 600057，而不是含糊的『不可点单』）")
+
+    # 场景三：全部门店都打烊 → 必须把接口原话带出来，并且不留"半个门店"给下游。
+    # 这里故意放 4 家（> MAX_STORE_TRIES），让"试店有上限"这条契约真的被压到。
+    fake = _FakeMCP(
+        stores=[{"storeCode": str(i), "storeName": "第%d店" % i, "businessStatus": False}
+                for i in range(4)],
+        closed_codes={"0", "1", "2", "3"},
+    )
+    dead = asyncio.run(load_data(fake))
+    expect("全打烊时不留半个门店", (dead.store, dead.ctx.store_code, dead.menu), ({}, "", []))
+    if not any("600057" in w or "不在营业时间" in w for w in dead.warnings):
+        _unit_failures.append("全打烊时没有把 600057 这条一手原因带进 warnings")
+    # 上限是 3 不是 4：返回 8 家门店时，不能因为"这家关门"就把 8 家全串一遍
+    # （每一次都是一次真实网络调用，用户在前台等着）。
+    expect("试店次数被上限截断", (len(fake.meals_asked), len(fake.meals_asked) < 4),
+           (MAX_STORE_TRIES, True))
+
+    # 场景四：只匹配到一家门店、而它明确打烊。
+    # 这时"把确定关门的垫底留着"才有价值：它会被问一次，于是用户看到的是
+    # 「门店不可点单：门店可能已关闭或不在营业时间」，而不是被引去找参数。
+    fake = _FakeMCP(
+        stores=[{"storeCode": "77", "storeName": "独苗店", "businessStatus": False}],
+        closed_codes={"77"},
+    )
+    lonely = asyncio.run(load_data(fake))
+    expect("唯一门店也会被问一次（垫底不丢弃）", fake.meals_asked, ["77"])
+    if not any("门店可能已关闭或不在营业时间" in w for w in lonely.warnings):
+        _unit_failures.append("唯一门店打烊时没报出门店不可点单，用户会被引去查 --city/--keyword")
 
     for msg in _unit_failures:
         print(f"❌ 单测失败  {msg}")

@@ -479,7 +479,15 @@ async def convene(
     proposals = await brain.proposals(roles, data, constraint, ctx)
     proposals = [p for p in proposals if p.line_items]
     if not proposals:
-        raise CouncilError("所有委员都没能给出方案：菜单或营养数据可能为空。")
+        # 不要只说"菜单可能是空的"。采集层早就把第一手原因（例如
+        # 「门店「麦当劳郑州CCD奥体中心餐厅」不可点单：门店可能已关闭或不在营业时间」）
+        # 记进 warnings 了，把它带出来。
+        #
+        # 否则用户看到"菜单或营养数据可能为空"，会跑去菜单和解析层找 bug，
+        # 而真正的原因（那家店 22:00 打烊了）一个字都没提 —— 这正是本项目
+        # 最反对的"静默降级"：报了一个错误的原因，比不报错还费时间。
+        detail = "；".join(data.warnings[:3]) or "菜单与营养数据均为空，且未记录到具体原因"
+        raise CouncilError("所有委员都没能给出方案：" + detail)
 
     # ---- 真实试算（官方金额，任何话术都不能覆盖它）----
     optimizer = Optimizer(data, constraint, objective=objective)
@@ -489,7 +497,11 @@ async def convene(
     if not plans:
         # 预算或约束过紧：退化为"最接近"的单品，并诚实说明
         if not pool:
-            raise CouncilError("菜单为空，无法给出建议。请检查门店参数，或加 --demo 体验完整流程。")
+            detail = "；".join(data.warnings[:3])
+            raise CouncilError(
+                "菜单为空，无法给出建议。请检查门店参数，或加 --demo 体验完整流程。"
+                + ("（%s）" % detail if detail else "")
+            )
         plans = [Plan([(pool[0], constraint.people)], round(pool[0].price * constraint.people, 2), 0.0)]
 
     verified = await optimizer.verify(plans)  # 已按「本地分 + 真实省下的钱」排序
