@@ -78,6 +78,16 @@ body{
 .ask b{color:var(--yellow)}
 .ask .sub{font-size:12px;opacity:.85;margin-top:5px}
 
+/* ---------- 采集提示（降级 / 换店）---------- */
+/* 这些提示在终端里是末尾那行 ⚠。HTML 是拿去分享的，收到的人只看得到
+   "门店：XXX" 那一行；如果不把同一批提示放进页面，分享出去的结论就会
+   比终端里更"确定"——那是信息失真，不是美化。 */
+.caveat{background:#FFFBEB;border:1px solid #FDE68A;border-top:0;padding:10px 24px 11px;
+  font-size:12px;color:#8A5A00;line-height:1.75}
+.caveat .ct{font-weight:800;margin-right:5px}
+.caveat ul{margin:4px 0 0;padding-left:18px}
+.caveat li{margin-top:3px}
+
 /* ---------- 作者条 ---------- */
 .author{background:#fff;border:1px solid var(--line);border-top:0;padding:10px 24px;
   display:flex;justify-content:space-between;align-items:center;gap:10px;
@@ -451,6 +461,20 @@ def _who_won(result) -> str:
 # 组装
 # --------------------------------------------------------------------------- #
 
+def _caveats(result) -> str:
+    """把采集层的 warnings 搬进页面。
+
+    终端里这些是末尾那行 ⚠，但 HTML 是拿去分享的：收到的人只看得到
+    "📍 门店：XXX"，不知道这家店是不是退而求其次来的、候选池是不是只扫了两家。
+    不放进页面，分享出去的结论就比终端里更"确定" —— 那是信息失真，不是美化。
+    """
+    items = [str(w).strip() for w in (getattr(result, "warnings", None) or []) if str(w).strip()]
+    if not items:
+        return ""
+    lis = "".join(f"<li>{escape(w)}</li>" for w in items)
+    return f'<div class="caveat"><span class="ct">⚠ 采集提示</span><ul>{lis}</ul></div>\n'
+
+
 def render_html_report(
     result,
     path: str | Path,
@@ -472,6 +496,7 @@ def render_html_report(
     trials_html = _trials(result)
     receipt_html = _receipt(result, pay_url)
     won_html = _who_won(result)
+    caveats_html = _caveats(result)
 
     repo_line = (
         f'<div>开源项目：<b>{escape(repo_url)}</b></div>'
@@ -504,6 +529,7 @@ def render_html_report(
     </div>
   </div>
 
+  {caveats_html}
   <div class="author">
     {repo_line}
     <div>👨‍💻 开发者微信：<span class="wx">{escape(developer_wx)}</span></div>

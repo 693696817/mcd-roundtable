@@ -22,3 +22,7 @@ secrets.json
 .capture*.txt
 _shot*.png
 _verify*.html
+
+# --html 每次跑都会重新生成的决议网页（README 示例里叫 verdict.html）。
+# 只忽略**根目录**的：assets/sample-verdict.html 是刻意留的样例，要保住。
+/*.html

@@ -202,6 +202,22 @@ def check_units() -> int:
     if "&lt;script&gt;" not in html:
         _unit_failures.append("HTML 小票把门店名整段丢了（应当转义后保留）")
 
+    # HTML 报告也得带上采集提示。HTML 是拿去分享的，收到的人只看得到
+    # "📍 门店：XXX"；提示不进页面，分享出去的结论就比终端里更"确定"——
+    # 那是信息失真。这里钉住"有提示就渲染、没提示不留空框、内容要转义"。
+    from mcd_roundtable.html_report import _caveats
+
+    class _W:
+        warnings = ["没给 --keyword，只能搜「我的收藏餐厅」（本次 2 家）", "<img src=x onerror=alert(1)>"]
+
+    cav = _caveats(_W())
+    if "我的收藏餐厅" not in cav:
+        _unit_failures.append("HTML 报告没把采集提示渲染进去（分享版会比终端少信息）")
+    if "<img src=x" in cav:
+        _unit_failures.append("HTML 采集提示里的内容没有被转义")
+    if _caveats(_Result()) != "":
+        _unit_failures.append("没有 warnings 时仍渲染了一个空的采集提示框")
+
     # ---- 门店打烊后的换店重试 -------------------------------------------- #
     # 这是真机上真实发生过、并且伪装成别的问题的一次故障：
     # `--city 郑州 --keyword 奥体中心` 的最近门店（07:00–22:00）在 23:13 已打烊，
@@ -226,9 +242,11 @@ def check_units() -> int:
             self.stores = stores
             self.closed_codes = closed_codes
             self.meals_asked: list[str] = []
+            self.store_args: dict = {}
 
         async def call(self, tool, args=None, **_kw):
             if tool == "query-nearby-stores":
+                self.store_args = dict(args or {})
                 return self.stores
             if tool == "query-meals":
                 code = str((args or {}).get("storeCode") or "")
@@ -320,6 +338,31 @@ def check_units() -> int:
     expect("唯一门店也会被问一次（垫底不丢弃）", fake.meals_asked, ["77"])
     if not any("门店可能已关闭或不在营业时间" in w for w in lonely.warnings):
         _unit_failures.append("唯一门店打烊时没报出门店不可点单，用户会被引去查 --city/--keyword")
+
+    # ---- 门店搜索降级（缺 keyword）必须说出来 ----------------------------- #
+    # 实测同一时刻：`--city 郑州` 单给只回 **2 家**（收藏列表，businessStatus 为 None、
+    # 无距离字段）；`city + keyword` 回 **5 家**并带距离。用户看着输出里的"门店"那一行，
+    # 会以为自己扫过了全城，其实只是在他自己收藏过的店里挑 —— 不说的降级等于骗。
+    fake = _FakeMCP(
+        stores=[{"storeCode": "3560090", "storeName": "谦祥万和城餐厅"}],
+        closed_codes=set(),
+    )
+    fav = asyncio.run(load_data(fake))  # 不传 city / keyword
+    expect("缺 keyword 时退化为收藏搜索 searchType=1", fake.store_args.get("searchType"), 1)
+    if not any("收藏" in w for w in fav.warnings):
+        _unit_failures.append("退化成「我的收藏餐厅」搜索却没告知用户（会让人以为扫了全城）")
+
+    # 正常路径不能平白多出这条降级提示，否则就成了狼来了
+    fake = _FakeMCP(
+        stores=[{"storeCode": "1", "storeName": "某店", "businessStatus": True}],
+        closed_codes=set(),
+    )
+    located = asyncio.run(load_data(fake, city="郑州", keyword="奥体中心"))
+    expect("给全 city+keyword 时按位置搜索 searchType=2", fake.store_args.get("searchType"), 2)
+    expect("正常搜索时 city/keyword 都进了请求",
+           (fake.store_args.get("city"), fake.store_args.get("keyword")), ("郑州", "奥体中心"))
+    if any("收藏" in w for w in located.warnings):
+        _unit_failures.append("正常按位置搜索却报了『我的收藏餐厅』降级（狼来了）")
 
     for msg in _unit_failures:
         print(f"❌ 单测失败  {msg}")

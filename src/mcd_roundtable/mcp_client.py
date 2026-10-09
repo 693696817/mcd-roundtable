@@ -669,11 +669,19 @@ async def load_data(
     # 实测：query-nearby-stores 必须**同时**给 city 与 keyword，
     # 否则报 600058「城市名或者关键词不能为空」。
     store_args: dict[str, Any] = {"beType": be_type, "searchType": 2}
+    degraded_search = False
     if city and keyword:
         store_args["city"] = city
         store_args["keyword"] = keyword
     else:
-        # 缺一不可，退化成"我的收藏餐厅"，让用户至少能跑起来
+        # 缺一不可，退化成"我的收藏餐厅"，让用户至少能跑起来。
+        #
+        # 但这是**降级，不是等价替换**：收藏列表通常只有寥寥几家，而按位置搜索能扫到
+        # 全城。实测同一时刻跑 `--city 郑州` 单给只回 **2 家**（且 businessStatus 为
+        # None、无距离字段），而 `city+keyword` 回 **5 家**并带距离。用户看着"门店"
+        # 那一行，会以为工具扫过了全城，实际上只在自己收藏过的店里挑。
+        # 所以下面会把这件事明确说出来 —— 不说的降级，等于骗。
+        degraded_search = True
         store_args["searchType"] = 1
         if city:
             store_args["city"] = city
@@ -684,6 +692,14 @@ async def load_data(
     store_list = stores if isinstance(stores, list) else (stores or {}).get("stores") or []
     if not store_list and isinstance(stores, dict):
         store_list = stores.get("data") or []
+
+    if degraded_search:
+        found = len(store_list) if isinstance(store_list, list) else 0
+        # 刻意写得短：终端的 ⚠ 行会被 rich 按屏宽折断，太长会把"本次 2 家"
+        # 从中间劈开（实测 100 列就会）。开头那半句本身就是该做的动作。
+        data.warnings.append(
+            "未给 --keyword，本次只搜了「我的收藏餐厅」（%d 家），不是全城" % found
+        )
 
     if isinstance(store_list, list) and store_list:
         candidates = [s for s in store_list if isinstance(s, dict) and s.get("storeCode")]
