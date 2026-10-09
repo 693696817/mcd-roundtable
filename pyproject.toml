@@ -5,11 +5,39 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mcd-roundtable"
 version = "0.1.0"
-description = "麦门圆桌 —— 多 AI 人格辩论式麦当劳点餐 Agent，基于麦当劳中国官方 MCP Server"
+description = "麦门圆桌 —— 多 AI 人格辩论式麦当劳点餐 Agent，基于麦当劳中国官方 MCP Server / Multi-agent McDonald's ordering skill on the official mcd-mcp"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-keywords = ["mcp", "mcdonalds", "agent", "llm", "cli"]
+keywords = [
+    "mcp",
+    "model-context-protocol",
+    "mcdonalds",
+    "mcd-mcp",
+    "ai-agent",
+    "multi-agent",
+    "llm",
+    "coupon",
+    "food-ordering",
+    "meal-planner",
+    "nutrition",
+    "cli",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "mcp>=1.2.0",
     "openai>=1.30.0",
@@ -18,6 +46,13 @@ dependencies = [
 
 [project.scripts]
 mcd-roundtable = "mcd_roundtable.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/693696817/mcd-roundtable"
+Repository = "https://github.com/693696817/mcd-roundtable"
+Issues = "https://github.com/693696817/mcd-roundtable/issues"
+Changelog = "https://github.com/693696817/mcd-roundtable/commits/main"
+English = "https://github.com/693696817/mcd-roundtable/blob/main/README.en.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

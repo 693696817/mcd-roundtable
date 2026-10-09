@@ -4,24 +4,62 @@
 
 **你只说一句话，五个 AI 人格当场吵起来，最后吵出一个真能下单的结果。**
 
+**麦门圆桌（`mcd-roundtable`）**是一个跑在**麦当劳中国官方 MCP Server**（`mcd-mcp`）上的
+**多智能体点餐决策 Skill / 命令行工具** —— 模型负责「吵」，官方接口负责「算」。
+
 席位：💰 省钱部长 · 🏋️ 健身总监 · 🍔 麦门老饕 · 🌿 养生专员 · 🎲 尝鲜委员
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![MCP](https://img.shields.io/badge/MCP-Streamable%20HTTP-FF6B35)
 ![McDonald's MCP](https://img.shields.io/badge/McDonald's%20MCP-official-FFC72C)
 ![License](https://img.shields.io/badge/License-MIT-green)
+![Demo](https://img.shields.io/badge/demo-no%20token%20needed-2ea44f)
+![Dependencies](https://img.shields.io/badge/dependencies-3-brightgreen)
+
+**简体中文** · [English](./README.en.md)
 
 </div>
 
+> **English:** *McDonald's Roundtable* (`mcd-roundtable`) is a **multi-agent ordering skill for
+> McDonald's China**, built on the official **`mcd-mcp`** server (Model Context Protocol).
+> Five AI council members debate your one-line request; every price is verified by the official
+> `calculate-price` API and is **never estimated by a language model**.
+> → Full English docs: [**README.en.md**](./README.en.md)
+
 <!-- 演示动画：由 tools/render_demo_gif.py 从真实运行输出录屏生成，非剪辑 -->
-<img src="./assets/demo.gif" alt="麦门圆桌演示：五位委员提案 → 交叉质询 → 官方试算 → 主持人裁决" width="620">
+<img src="./assets/demo.gif" alt="麦门圆桌（mcd-roundtable）演示：麦当劳 MCP 多智能体点餐 —— 五位委员提案 → 交叉质询 → 官方 calculate-price 真实试算 → 主持人裁决" width="620">
 
 > 上面这段滚动播放的画面，是程序在**真实麦当劳 MCP** 上的实际输出，没有剪辑。
 > 门店、菜单、券、价格全部来自真实接口（这次是麦当劳郑州正弘城餐厅）。
 
 ---
 
-## 三十秒看懂
+## 一分钟了解
+
+| | |
+| --- | --- |
+| **它是什么** | 基于**麦当劳官方 MCP** 的**多智能体（multi-agent）点餐决策**命令行工具 / AI Agent Skill |
+| **一句话概括** | 五个立场互相冲突的 AI 委员就你的需求当场辩论，用官方真实算价互相质询，再由确定性求解器裁决出一个能直接下单的方案 |
+| **解决什么问题** | 午餐没有唯一正确答案。价格、蛋白质、口味、健康是四种互相冲突的立场，塞进一个 prompt 只会得到和稀泥的结果 |
+| **和一般「AI 点餐」的区别** | 多数工具让模型**估**价格；本项目所有金额都来自官方 `calculate-price` 真实试算 —— 模型只负责说理，不碰算钱 |
+| **要不要 Token** | 不要。`--demo` 零配置、不联网也能跑通全流程（内置与真机**同构的原始报文**） |
+| **要不要大模型** | 不要。不配 LLM Key 时自动退回规则大脑（`HeuristicBrain`），功能完整 |
+| **能不能真下单** | 能。`--order` 调用官方 `create-order` 并返回**麦当劳官方**支付链接；本项目不接触任何支付凭证 |
+| **技术栈** | Python 3.10+ · MCP Streamable HTTP · 无外部服务依赖（只依赖 `mcp` / `openai` / `rich`） |
+| **输出形态** | 终端 · SVG 决议卡 · 单文件零 JS 网页 · 结构化 JSON（供其它 Agent 调用） |
+
+## 目录
+
+- 入门：[一分钟了解](#一分钟了解) · [三十秒看懂](#三十秒看懂离线体验不需要-token) · [快速开始](#快速开始)
+- 原理：[它到底做了什么](#它到底做了什么五个-ai-委员的多智能体辩论) · [两条硬规矩](#两条硬规矩模型负责吵官方接口负责算) · [工作流程](#工作流程)
+- 亮点：[三个别处看不到的细节](#三个别处看不到的细节) · [真实模式跑起来是什么样](#真实模式跑起来是什么样麦当劳官方-mcp-实测输出) · [把决议变成一张能发出去的网页](#把决议变成一张能发出去的网页单文件-html-导出)
+- 对接：[实测踩到的坑（给要接麦当劳 MCP 的人）](#实测踩到的坑给要接麦当劳-mcp-的人) · [命令行参数](#命令行参数) · [常见问题 FAQ](#常见问题-faq)
+- 工程：[项目结构](#项目结构) · [三道门禁](#三道门禁) · [关键词与别名](#关键词与别名)
+- 其它：[目标用户](#目标用户) · [合规与边界](#合规与边界) · [交流与支持](#交流与支持) · [参赛信息](#参赛信息)
+
+---
+
+## 三十秒看懂（离线体验，不需要 Token）
 
 ```bash
 pip install -r requirements.txt && python -m mcd_roundtable --demo "中午想吃饱，30 以内，把券用上"
@@ -30,14 +68,14 @@ pip install -r requirements.txt && python -m mcd_roundtable --demo "中午想吃
 **不需要任何 Token，不需要联网。** 坐下来看完五位委员吵完一架，你就能决定今天中午吃什么。
 
 <!-- 决议卡：由 `--share` 直接导出，可截图、可贴群、可发朋友圈 -->
-<img src="./assets/decision-card.svg" alt="麦门决议卡" width="640">
+<img src="./assets/decision-card.svg" alt="麦当劳点餐决议卡（SVG）—— 由 mcd-roundtable --share 真实导出，含五位委员结论与官方算价明细" width="640">
 
 > 上面这张「麦门决议卡」不是设计稿，是程序的输出：
 > `mcd-roundtable --share card.svg "..."` 会把你这次的结论导成一张自包含 SVG。
 
 ---
 
-## 它到底做了什么
+## 它到底做了什么：五个 AI 委员的多智能体辩论
 
 一句话点餐的工具已经很多了。**这个项目想解决的是另一个问题：午餐没有唯一正确答案。**
 
@@ -58,7 +96,7 @@ pip install -r requirements.txt && python -m mcd_roundtable --demo "中午想吃
 
 ---
 
-## 两条硬规矩
+## 两条硬规矩：模型负责「吵」，官方接口负责「算」
 
 这个项目有一句贯穿始终的原则：
 
@@ -121,22 +159,22 @@ pip install -r requirements.txt && python -m mcd_roundtable --demo "中午想吃
 
 ---
 
-## 真实模式跑起来是什么样
+## 真实模式跑起来是什么样（麦当劳官方 MCP 实测输出）
 
 配好 Token 之后，同一套流程走的是麦当劳官方 MCP，下面是一次**真实运行**的输出：
 
-<img src="./assets/terminal-live.png" alt="真实模式完整输出：提案 → 质询 → 试算 → 裁决" width="720">
+<img src="./assets/terminal-live.png" alt="真实模式完整输出：麦当劳 MCP 多智能体点餐的提案 → 质询 → 官方 calculate-price 试算 → 裁决" width="720">
 
 其中真正体现思路的是这两段 —— 委员拿着官方算出来的真金白银互相质询，
 以及最后那张能直接照着下单的小票：
 
-<img src="./assets/terminal-debate.png" alt="第 2 轮交叉质询 + 真实试算" width="720">
+<img src="./assets/terminal-debate.png" alt="第 2 轮交叉质询 + 麦当劳官方 MCP 真实算价" width="720">
 
-<img src="./assets/terminal-verdict.png" alt="主持人裁决小票" width="720">
+<img src="./assets/terminal-verdict.png" alt="主持人裁决小票（麦当劳点餐方案与官方价格明细）" width="720">
 
 同一份决议加 `--share` 就能导出成一张自包含的 SVG 决议卡，可直接发群里：
 
-<img src="./assets/live-card.svg" alt="真实模式导出的决议卡" width="640">
+<img src="./assets/live-card.svg" alt="真实模式导出的麦当劳点餐决议卡（SVG），含官方算价与五位委员结论" width="640">
 
 > **关于「优惠 —」：** 这不是 bug。该账号手上的券是"9.9 元中杯冰美式"这类**单品特价券**，
 > 与本次选中的餐品不匹配，官方接口如实返回 0。
@@ -144,7 +182,7 @@ pip install -r requirements.txt && python -m mcd_roundtable --demo "中午想吃
 
 ---
 
-## 把决议变成一张能发出去的网页
+## 把决议变成一张能发出去的网页（单文件 HTML 导出）
 
 终端输出有个天然缺陷：**它传播不出去**。截图带终端边框和滚动条，抄成文字又丢掉全部排版。
 
@@ -309,7 +347,7 @@ export ROUNDTABLE_LLM_MODEL="deepseek-chat"
 
 ---
 
-## 命令行
+## 命令行参数
 
 ```bash
 # 一句话点餐（真实模式）
@@ -390,7 +428,8 @@ flowchart TD
 
 ```
 mcd-roundtable/
-├── README.md                    # 项目介绍 / 安装方法 / 使用示例 / 目标用户
+├── README.md                    # 项目介绍 / 安装方法 / 使用示例 / 目标用户（本文件）
+├── README.en.md                 # English documentation
 ├── CONTEST_DECLARATION.md       # 参赛声明（官方模板，内容不可改动）
 ├── MCP_INTEGRATION.md           # MCP 接入说明：用到的工具、调用时序、业务价值
 ├── mcp-config.example.json      # MCP 配置示例（只含环境变量占位符）
@@ -465,6 +504,102 @@ python tools/check_width.py                  # ③ 版式
 > 一是"再点 ¥X 净降 ¥Y"里的 `Y` 必须把已得优惠和跨档多花的钱都减掉；
 > 二是本地兜底价必须显式标注成 `local-fallback`，绝不能冒充官方价格。
 > 这两处错都不会抛异常，只会让人多花钱。
+
+---
+
+## 常见问题 FAQ
+
+### 麦当劳有官方 MCP 吗？Token 怎么申请？
+
+有，而且免费。麦当劳中国官方 MCP Server 地址是 `https://mcp.mcd.cn`，接入文档在 <https://open.mcd.cn/mcp>，
+登录后进「控制台 → 激活」即可拿到 Token。
+
+⚠️ 一个高频踩坑：**MCP Token 和大模型 API Key 是两回事**。
+把 LLM Key 当 MCP Token 用会返回 `400008 当前authToken不允许超过64位长度`。
+
+### 它会乱算价格吗？我怎么知道那些数字是真的？
+
+不会 —— 这是整个项目的核心设计：**模型只负责「说理」，不负责「算钱」**。
+
+- 菜单、券、营养、价格全部来自麦当劳官方接口；
+- 候选方案逐个调用官方 `calculate-price` **真实试算**，最终的优惠金额、总价、"再凑多少更划算"全部以官方返回为准；
+- 万一试算接口不可用，兜底价会被显式标注成 `local-fallback`，**绝不冒充官方价格**。
+
+### 一定要配大模型 API Key 才能用吗？
+
+不用。不配 Key 时会自动退回**规则大脑（`HeuristicBrain`）**，五位委员照样吵，功能完整。
+想用更自然的话术，配任意 **OpenAI 兼容端点**即可（DeepSeek / 通义 / 豆包 / 本地 Ollama 都行）：
+
+```bash
+export ROUNDTABLE_LLM_API_KEY="sk-..."
+export ROUNDTABLE_LLM_BASE_URL="https://api.deepseek.com/v1"
+export ROUNDTABLE_LLM_MODEL="deepseek-chat"
+```
+
+### 支持外送吗？支持到店自取和得来速吗？
+
+加 `--delivery` 即按外送试算。但注意 `query-nearby-stores` 的 `beType=2`（麦乐送到家）
+会报 `600046 仅支持到店和得来速`，所以门店定位仍走到店口径。
+
+### 能真的下单吗？会扣我的钱吗？
+
+`--order` 会调用官方 `create-order` 并返回**麦当劳官方**支付链接，最后一步在麦当劳页面上完成。
+本项目**不接触、不保存任何支付凭证**；不加 `--order` 就不会产生任何订单。
+
+### 支持哪些城市和门店？
+
+任何麦当劳中国门店。定位时需要**同时**给城市和关键词，只给一个会报 `600058`：
+
+```bash
+mcd-roundtable --city 郑州 --keyword 正弘城 "中午想吃饱，35 以内，把券用上"
+```
+
+### 营养数据全吗？会不会把缺数据当成 0？
+
+`list-nutrition-foods` **不覆盖全部商品**（套餐类常常查不到）。
+本项目绝不把缺失当 0 —— 数据缺失时跳过热量硬约束、只做轻微扣分，
+并在结论里明说「无法核验」。否则「热量 < 200kcal」这类硬约束会把整类商品误杀。
+
+### 能接进我自己的 Agent 或工作流吗？
+
+可以。`--json` 输出结构化结果，直接给别的 Agent 消费；
+仓库里的 [`mcp-config.example.json`](./mcp-config.example.json) 也给出了 MCP 客户端侧的配置示例。
+
+### 这是麦当劳官方项目吗？
+
+**不是。** 本项目是独立开发的作品，与麦当劳无隶属关系、非官方产品，
+只是**真实调用**了麦当劳中国官方 MCP 接口。
+所有餐品、价格、优惠、营养数据均来自官方接口，最终以麦当劳官方渠道的实时结果为准。
+
+### 为什么叫「麦门圆桌」？
+
+「麦门」是麦当劳爱好者的自称；「圆桌」指五个**立场平权**的委员坐下来辩论 ——
+没有谁是「主脑」，谁也不能压过谁。圆桌之后，中立的主持人（确定性求解器）才定案。
+
+### 它和别的麦当劳点餐工具有什么不同？
+
+三条，都能在本文档里找到对应实现：
+
+1. **算价只认官方接口** —— 不做任何价格估算，兜底价显式标注；
+2. **决策理由可量化** —— 不选最便宜时会告诉你「多花 ¥1.2 换来人均多 150kcal」；给不出量化理由就不编；
+3. **约束没达成就直说** —— 不会偷偷把「蛋白质 30g」改成 25g 再宣布成功。
+
+---
+
+## 关键词与别名
+
+方便检索 —— 本项目也会被下面这些说法指代。
+**每一项都能在本文档里找到对应的实现或章节**，不是关键词堆砌：
+
+| 类别 | 说法 |
+| --- | --- |
+| **MCP 生态** | 麦当劳 MCP · McDonald's MCP · `mcd-mcp` · `mcdonalds-mcp` · Model Context Protocol · MCP Server · MCP Client · MCP Skill · MCP 工具调用 · Streamable HTTP |
+| **项目本身** | 麦门圆桌 · `mcd-roundtable` · McDonald's Roundtable · 麦门 · 圆桌议会 |
+| **形态** | AI Agent Skill · 智能体技能 · 命令行工具 · Python CLI · 多智能体 · multi-agent · 多角色辩论 |
+| **场景** | 麦当劳点餐助手 · 一句话点餐 · AI 点餐 · 优惠券凑单 · 凑单最省 · 券最大化 · 团餐 · 多人点餐 |
+| **营养** | 营养配餐 · 减脂点餐 · 增肌 · 蛋白质 · 热量 · 卡路里 · 控钠 · 低卡 |
+| **技术** | WorkBuddy · 腾讯 WorkBuddy · LLM 工具调用 · 约束优化 · 确定性求解器 · 结构化输出（JSON） |
+| **输出** | 决议卡 · SVG 导出 · 单文件 HTML 报告 · 零 JavaScript 网页 · 麦当劳官方支付链接 |
 
 ---
 
